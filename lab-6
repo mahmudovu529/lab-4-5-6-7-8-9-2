@@ -1,0 +1,215 @@
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QLabel, QPushButton, QLineEdit,
+    QGridLayout, QVBoxLayout, QStackedLayout
+)
+
+# 1-vazifa: Login oynasi
+class LoginWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Login")
+
+        layout = QGridLayout()
+
+        self.login = QLineEdit()
+        self.parol = QLineEdit()
+        self.parol.setEchoMode(QLineEdit.Password)
+
+        btn_kirish = QPushButton("Kirish")
+        btn_tozalash = QPushButton("Tozalash")
+
+        btn_tozalash.clicked.connect(self.clear_fields)
+
+        layout.addWidget(QLabel("Login:"), 0, 0)
+        layout.addWidget(self.login, 0, 1)
+        layout.addWidget(QLabel("Parol:"), 1, 0)
+        layout.addWidget(self.parol, 1, 1)
+        layout.addWidget(btn_kirish, 2, 0)
+        layout.addWidget(btn_tozalash, 2, 1)
+
+        self.setLayout(layout)
+
+    def clear_fields(self):
+        self.login.clear()
+        self.parol.clear()
+
+
+# 2-vazifa: Oddiy kalkulyator
+class Calculator(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Calculator")
+
+        layout = QGridLayout()
+        self.display = QLineEdit()
+
+        layout.addWidget(self.display, 0, 0, 1, 3)
+
+        buttons = [
+            '7', '8', '9',
+            '4', '5', '6',
+            '1', '2', '3',
+            '0', '+', '-',
+            '='
+        ]
+
+        positions = [(i, j) for i in range(1, 6) for j in range(3)]
+
+        for pos, text in zip(positions, buttons):
+            btn = QPushButton(text)
+            btn.clicked.connect(self.on_click)
+            layout.addWidget(btn, *pos)
+
+        self.setLayout(layout)
+
+    def on_click(self):
+        sender = self.sender().text()
+        if sender == '=':
+            try:
+                result = eval(self.display.text())
+                self.display.setText(str(result))
+            except:
+                self.display.setText("Error")
+        else:
+            self.display.setText(self.display.text() + sender)
+
+
+# 3-vazifa: 3 sahifali ilova
+class MultiPageApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("3 Page App")
+
+        self.stack = QStackedLayout()
+
+        # Sahifa 1
+        page1 = QWidget()
+        v1 = QVBoxLayout()
+        btn1 = QPushButton("User Info")
+        btn2 = QPushButton("About")
+        btn1.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        btn2.clicked.connect(lambda: self.stack.setCurrentIndex(2))
+        v1.addWidget(QLabel("Bosh menyu"))
+        v1.addWidget(btn1)
+        v1.addWidget(btn2)
+        page1.setLayout(v1)
+
+        # Sahifa 2
+        page2 = QWidget()
+        v2 = QVBoxLayout()
+        v2.addWidget(QLabel("Foydalanuvchi haqida"))
+        back1 = QPushButton("Orqaga")
+        back1.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        v2.addWidget(back1)
+        page2.setLayout(v2)
+
+        # Sahifa 3
+        page3 = QWidget()
+        v3 = QVBoxLayout()
+        v3.addWidget(QLabel("Dastur haqida"))
+        back2 = QPushButton("Orqaga")
+        back2.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        v3.addWidget(back2)
+        page3.setLayout(v3)
+
+        self.stack.addWidget(page1)
+        self.stack.addWidget(page2)
+        self.stack.addWidget(page3)
+
+        self.setLayout(self.stack)
+
+
+# 4-vazifa: Talaba ro‘yxatdan o‘tish
+class StudentApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Student App")
+
+        self.stack = QStackedLayout()
+
+        # Menu
+        menu = QWidget()
+        v = QVBoxLayout()
+        btn = QPushButton("Ro‘yxatdan o‘tish")
+        btn.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        v.addWidget(btn)
+        menu.setLayout(v)
+
+        # Form
+        form = QWidget()
+        g = QGridLayout()
+        self.name = QLineEdit()
+        self.age = QLineEdit()
+        submit = QPushButton("Saqlash")
+        submit.clicked.connect(self.show_data)
+
+        g.addWidget(QLabel("Ism:"), 0, 0)
+        g.addWidget(self.name, 0, 1)
+        g.addWidget(QLabel("Yosh:"), 1, 0)
+        g.addWidget(self.age, 1, 1)
+        g.addWidget(submit, 2, 0, 1, 2)
+        form.setLayout(g)
+
+        # Result
+        result = QWidget()
+        self.result_layout = QVBoxLayout()
+        self.result_label = QLabel("")
+        back = QPushButton("Menu")
+        back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        self.result_layout.addWidget(self.result_label)
+        self.result_layout.addWidget(back)
+        result.setLayout(self.result_layout)
+
+        self.stack.addWidget(menu)
+        self.stack.addWidget(form)
+        self.stack.addWidget(result)
+
+        self.setLayout(self.stack)
+
+    def show_data(self):
+        text = f"Ism: {self.name.text()}\nYosh: {self.age.text()}"
+        self.result_label.setText(text)
+        self.stack.setCurrentIndex(2)
+
+
+# 5-vazifa: Mini test
+class TestApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Mini Test")
+
+        self.stack = QStackedLayout()
+
+        for i in range(3):
+            page = QWidget()
+            v = QVBoxLayout()
+            v.addWidget(QLabel(f"Savol {i+1}"))
+
+            if i > 0:
+                back = QPushButton("Orqaga")
+                back.clicked.connect(lambda _, x=i-1: self.stack.setCurrentIndex(x))
+                v.addWidget(back)
+
+            if i < 2:
+                next_btn = QPushButton("Keyingi")
+                next_btn.clicked.connect(lambda _, x=i+1: self.stack.setCurrentIndex(x))
+                v.addWidget(next_btn)
+            else:
+                finish = QPushButton("Yakunlash")
+                finish.clicked.connect(self.close)
+                v.addWidget(finish)
+
+            page.setLayout(v)
+            self.stack.addWidget(page)
+
+        self.setLayout(self.stack)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+
+    window = LoginWindow()  # boshqa oynani ham qo‘yib sinab ko‘rish mumkin
+    window.show()
+
+    sys.exit(app.exec_())
