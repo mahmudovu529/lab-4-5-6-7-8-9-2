@@ -1,0 +1,452 @@
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QLabel, QCheckBox, QComboBox, QListWidget,
+    QLineEdit, QSpinBox, QDoubleSpinBox, QSlider, QDial,
+    QPushButton, QHBoxLayout, QVBoxLayout, QGroupBox, QMessageBox,
+    QScrollArea, QFrame, QRadioButton, QButtonGroup, QDateEdit, QTextEdit
+)
+from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtGui import QFont, QPalette, QColor
+
+
+class WidgetsDemo(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("PyQt5 Widgets Demo (Dasturlash 2)")
+        self.setMinimumWidth(800)
+        self.setMinimumHeight(700)
+
+        # Asosiy rang sxemasi
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #f5f5f5;
+            }
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #3498db;
+                border-radius: 8px;
+                margin-top: 10px;
+                padding-top: 10px;
+                background-color: white;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: #2980b9;
+            }
+            QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QTextEdit {
+                padding: 5px;
+                border: 1px solid #bdc3c7;
+                border-radius: 4px;
+                background-color: white;
+            }
+            QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
+                border: 2px solid #3498db;
+            }
+            QPushButton {
+                background-color: #3498db;
+                color: white;
+                padding: 8px;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #2980b9;
+            }
+            QPushButton#resetBtn {
+                background-color: #e74c3c;
+            }
+            QPushButton#resetBtn:hover {
+                background-color: #c0392b;
+            }
+            QSlider::groove:horizontal {
+                height: 6px;
+                background: #bdc3c7;
+                border-radius: 3px;
+            }
+            QSlider::handle:horizontal {
+                background: #3498db;
+                width: 18px;
+                margin: -5px 0;
+                border-radius: 9px;
+            }
+            QDial {
+                background-color: white;
+                border-radius: 50px;
+            }
+        """)
+
+        # ====== Vidjetlar ======
+        # Sarlavha
+        self.title_label = QLabel("🎯 PyQt5 Vidjetlari Demosi")
+        self.title_label.setStyleSheet("""
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #2c3e50;
+            padding: 15px;
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #3498db, stop:1 #2980b9);
+            color: white;
+            border-radius: 10px;
+        """)
+        self.title_label.setAlignment(Qt.AlignCenter)
+
+        # Natija uchun label
+        self.info_label = QLabel("Natija: (hali tanlanmadi)")
+        self.info_label.setStyleSheet("""
+            font-size: 14px; 
+            background-color: #ecf0f1; 
+            padding: 15px; 
+            border-radius: 8px;
+            font-family: monospace;
+            border: 1px solid #bdc3c7;
+        """)
+        self.info_label.setWordWrap(True)
+
+        # QLineEdit
+        self.name_input = QLineEdit()
+        self.name_input.setPlaceholderText("Ismingizni kiriting...")
+        self.name_input.setToolTip("Ismingizni kiriting")
+
+        # QDateEdit (yangi qo'shildi)
+        self.date_birth = QDateEdit()
+        self.date_birth.setDate(QDate.currentDate().addYears(-18))
+        self.date_birth.setCalendarPopup(True)
+        self.date_birth.setDisplayFormat("dd.MM.yyyy")
+
+        # QCheckBox
+        self.cb_python = QCheckBox("🐍 Python")
+        self.cb_cpp = QCheckBox("⚙️ C++")
+        self.cb_js = QCheckBox("🌐 JavaScript")
+        self.cb_java = QCheckBox("☕ Java")  # Yangi qo'shildi
+
+        # QRadioButton (yangi qo'shildi)
+        self.radio_male = QRadioButton("👨 Erkak")
+        self.radio_female = QRadioButton("👩 Ayol")
+        self.radio_other = QRadioButton("👤 Boshqa")
+        self.gender_group = QButtonGroup()
+        self.gender_group.addButton(self.radio_male)
+        self.gender_group.addButton(self.radio_female)
+        self.gender_group.addButton(self.radio_other)
+        self.radio_male.setChecked(True)
+
+        # QComboBox
+        self.combo_city = QComboBox()
+        self.combo_city.addItems(["Toshkent", "Samarqand", "Buxoro", "Andijon", "Namangan", "Farg'ona"])
+
+        # QListWidget
+        self.list_courses = QListWidget()
+        self.list_courses.addItems([
+            "📘 Dasturlash 2",
+            "🗄️ Ma'lumotlar bazasi",
+            "🌐 Kompyuter tarmoqlari",
+            "🔒 Axborot xavfsizligi",
+            "🤖 Sun'iy intellekt asoslari",
+            "📊 Web dasturlash"
+        ])
+        self.list_courses.setSelectionMode(QListWidget.SingleSelection)
+
+        # QSpinBox / QDoubleSpinBox
+        self.spin_age = QSpinBox()
+        self.spin_age.setRange(1, 120)
+        self.spin_age.setValue(18)
+        self.spin_age.setSuffix(" yosh")
+        self.spin_age.setToolTip("Yoshingizni kiriting")
+
+        self.dspin_gpa = QDoubleSpinBox()
+        self.dspin_gpa.setRange(0.0, 4.0)
+        self.dspin_gpa.setSingleStep(0.1)
+        self.dspin_gpa.setValue(3.0)
+        self.dspin_gpa.setPrefix("⭐ ")
+
+        # QSlider
+        self.slider_level = QSlider(Qt.Horizontal)
+        self.slider_level.setRange(0, 100)
+        self.slider_level.setValue(50)
+        self.slider_level.setTickPosition(QSlider.TicksBelow)
+        self.slider_level.setTickInterval(10)
+        self.slider_level.setToolTip("Darajangizni tanlang (0-100)")
+
+        # QDial
+        self.dial_speed = QDial()
+        self.dial_speed.setRange(0, 10)
+        self.dial_speed.setValue(5)
+        self.dial_speed.setNotchesVisible(True)
+        self.dial_speed.setFixedSize(120, 120)
+        self.dial_speed.setToolTip("Tezlikni tanlang (0-10)")
+
+        # QTextEdit (yangi qo'shildi)
+        self.comments = QTextEdit()
+        self.comments.setPlaceholderText("Qo'shimcha izoh yozing...")
+        self.comments.setMaximumHeight(80)
+
+        # Slider va dial qiymatlarini ko'rsatuvchi label
+        self.slider_value_label = QLabel("Daraja: 50")
+        self.dial_value_label = QLabel("Tezlik: 5")
+
+        # Button
+        self.btn_show = QPushButton("📊 Natijani chiqarish")
+        self.btn_reset = QPushButton("🔄 Tozalash / Reset")
+        self.btn_reset.setObjectName("resetBtn")
+        self.btn_export = QPushButton("💾 Natijani eksport qilish")  # Yangi qo'shildi
+
+        # ====== Joylash (Layout) ======
+        root = QVBoxLayout()
+
+        # Scroll Area qo'shish (ko'p ma'lumot uchun)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("QScrollArea { border: none; background-color: transparent; }")
+
+        scroll_content = QWidget()
+        main_layout = QVBoxLayout(scroll_content)
+
+        main_layout.addWidget(self.title_label)
+
+        # 1) Forma bloki
+        form_box = QGroupBox("📝 1) Shaxsiy ma'lumotlar")
+        form_layout = QVBoxLayout()
+
+        form_layout.addWidget(QLabel("Ism:"))
+        form_layout.addWidget(self.name_input)
+
+        form_layout.addWidget(QLabel("Tug'ilgan sana:"))
+        form_layout.addWidget(self.date_birth)
+
+        row_age = QHBoxLayout()
+        row_age.addWidget(QLabel("Yosh (QSpinBox):"))
+        row_age.addWidget(self.spin_age)
+        form_layout.addLayout(row_age)
+
+        row_gpa = QHBoxLayout()
+        row_gpa.addWidget(QLabel("GPA (QDoubleSpinBox):"))
+        row_gpa.addWidget(self.dspin_gpa)
+        form_layout.addLayout(row_gpa)
+
+        # Jins tanlash
+        form_layout.addWidget(QLabel("Jins:"))
+        gender_layout = QHBoxLayout()
+        gender_layout.addWidget(self.radio_male)
+        gender_layout.addWidget(self.radio_female)
+        gender_layout.addWidget(self.radio_other)
+        form_layout.addLayout(gender_layout)
+
+        form_box.setLayout(form_layout)
+
+        # 2) Tanlov bloki
+        select_box = QGroupBox("🎯 2) Tanlovlar")
+        select_layout = QVBoxLayout()
+
+        select_layout.addWidget(QLabel("Dasturlash tillari (QCheckBox):"))
+        lang_row = QHBoxLayout()
+        lang_row.addWidget(self.cb_python)
+        lang_row.addWidget(self.cb_cpp)
+        lang_row.addWidget(self.cb_js)
+        lang_row.addWidget(self.cb_java)
+        select_layout.addLayout(lang_row)
+
+        select_layout.addWidget(QLabel("Shahar (QComboBox):"))
+        select_layout.addWidget(self.combo_city)
+
+        select_layout.addWidget(QLabel("Fanlar (QListWidget) — 1 ta tanlang:"))
+        select_layout.addWidget(self.list_courses)
+
+        select_box.setLayout(select_layout)
+
+        # 3) Boshqaruv bloki
+        control_box = QGroupBox("⚙️ 3) Boshqaruvlar")
+        control_layout = QVBoxLayout()
+
+        control_layout.addWidget(QLabel("Daraja (QSlider 0..100):"))
+        control_layout.addWidget(self.slider_level)
+        control_layout.addWidget(self.slider_value_label)
+
+        dial_row = QHBoxLayout()
+        dial_row.addWidget(QLabel("Tezlik (QDial 0..10):"))
+        dial_row.addWidget(self.dial_speed)
+        dial_row.addWidget(self.dial_value_label)
+        dial_row.addStretch()
+        control_layout.addLayout(dial_row)
+
+        control_layout.addWidget(QLabel("Qo'shimcha izoh:"))
+        control_layout.addWidget(self.comments)
+
+        control_box.setLayout(control_layout)
+
+        # 4) Tugmalar va natija
+        btn_row = QHBoxLayout()
+        btn_row.addWidget(self.btn_show)
+        btn_row.addWidget(self.btn_reset)
+        btn_row.addWidget(self.btn_export)
+
+        main_layout.addWidget(form_box)
+        main_layout.addWidget(select_box)
+        main_layout.addWidget(control_box)
+        main_layout.addLayout(btn_row)
+        main_layout.addWidget(self.info_label)
+
+        scroll.setWidget(scroll_content)
+        root.addWidget(scroll)
+        self.setLayout(root)
+
+        # ====== Signal-slot ======
+        self.btn_show.clicked.connect(self.update_result)
+        self.btn_reset.clicked.connect(self.reset_all)
+        self.btn_export.clicked.connect(self.export_result)
+
+        # Avto yangilanish
+        self.name_input.textChanged.connect(self.update_result)
+        self.spin_age.valueChanged.connect(self.update_result)
+        self.dspin_gpa.valueChanged.connect(self.update_result)
+        self.cb_python.stateChanged.connect(self.update_result)
+        self.cb_cpp.stateChanged.connect(self.update_result)
+        self.cb_js.stateChanged.connect(self.update_result)
+        self.cb_java.stateChanged.connect(self.update_result)
+        self.combo_city.currentIndexChanged.connect(self.update_result)
+        self.list_courses.itemSelectionChanged.connect(self.update_result)
+        self.slider_level.valueChanged.connect(self.on_slider_changed)
+        self.dial_speed.valueChanged.connect(self.on_dial_changed)
+        self.date_birth.dateChanged.connect(self.update_result)
+        self.radio_male.toggled.connect(self.update_result)
+        self.radio_female.toggled.connect(self.update_result)
+        self.radio_other.toggled.connect(self.update_result)
+        self.comments.textChanged.connect(self.update_result)
+
+        # Boshlang'ich natija
+        self.update_result()
+
+    def on_slider_changed(self, v: int):
+        """Slider o'zgarganda dial va labelni yangilash"""
+        self.slider_value_label.setText(f"📈 Daraja: {v}")
+        dial_value = round(v / 10)
+        self.dial_speed.setValue(dial_value)
+        self.update_result()
+
+    def on_dial_changed(self, v: int):
+        """Dial o'zgarganda labelni yangilash"""
+        self.dial_value_label.setText(f"⚡ Tezlik: {v}")
+        self.update_result()
+
+    def get_languages(self):
+        """Tanlangan tillarni qaytarish"""
+        langs = []
+        if self.cb_python.isChecked():
+            langs.append("Python")
+        if self.cb_cpp.isChecked():
+            langs.append("C++")
+        if self.cb_js.isChecked():
+            langs.append("JavaScript")
+        if self.cb_java.isChecked():
+            langs.append("Java")
+        return langs if langs else ["(tanlanmadi)"]
+
+    def get_selected_course(self):
+        """Tanlangan fanni qaytarish"""
+        items = self.list_courses.selectedItems()
+        return items[0].text() if items else "(tanlanmadi)"
+
+    def get_gender(self):
+        """Tanlangan jinsni qaytarish"""
+        if self.radio_male.isChecked():
+            return "Erkak"
+        elif self.radio_female.isChecked():
+            return "Ayol"
+        else:
+            return "Boshqa"
+
+    def update_result(self):
+        """Barcha vidjetlarning qiymatlarini o'qib, natijani yangilash"""
+        name = self.name_input.text().strip() or "(kiritilmadi)"
+        age = self.spin_age.value()
+        gpa = self.dspin_gpa.value()
+        city = self.combo_city.currentText()
+        course = self.get_selected_course()
+        langs = ", ".join(self.get_languages())
+        level = self.slider_level.value()
+        speed = self.dial_speed.value()
+        gender = self.get_gender()
+        birth_date = self.date_birth.date().toString("dd.MM.yyyy")
+        comments = self.comments.toPlainText().strip() or "(izoh yo'q)"
+
+        text = (
+            f"╔════════════════════════════════════════════════════════════╗\n"
+            f"║                      📊 NATIJA                              ║\n"
+            f"╠════════════════════════════════════════════════════════════╣\n"
+            f"║ 👤 Ism: {name:<52} ║\n"
+            f"║ 📅 Tug'ilgan sana: {birth_date:<44} ║\n"
+            f"║ 🎂 Yosh: {age:<52} ║\n"
+            f"║ ⚥ Jins: {gender:<52} ║\n"
+            f"║ 📚 GPA: {gpa:.1f}{' ' * (48 - len(str(gpa)))} ║\n"
+            f"║ 🏙️ Shahar: {city:<50} ║\n"
+            f"║ 📖 Fan: {course:<52} ║\n"
+            f"║ 💻 Tillar: {langs:<49} ║\n"
+            f"║ 📈 Daraja (Slider): {level:<46} ║\n"
+            f"║ ⚡ Tezlik (Dial): {speed:<48} ║\n"
+            f"║ 💬 Izoh: {comments:<51} ║\n"
+            f"╚════════════════════════════════════════════════════════════╝"
+        )
+        self.info_label.setText(text)
+
+    def export_result(self):
+        """Natijani faylga eksport qilish"""
+        from PyQt5.QtWidgets import QFileDialog
+
+        file_name, _ = QFileDialog.getSaveFileName(
+            self,
+            "Natijani saqlash",
+            "natija.txt",
+            "Matn fayllari (*.txt);;Barcha fayllar (*.*)"
+        )
+
+        if file_name:
+            try:
+                with open(file_name, 'w', encoding='utf-8') as f:
+                    f.write(self.info_label.text())
+                QMessageBox.information(self, "Eksport", f"✅ Natija muvaffaqiyatli saqlandi!\n{file_name}")
+            except Exception as e:
+                QMessageBox.warning(self, "Xato", f"❌ Saqlashda xatolik: {str(e)}")
+
+    def reset_all(self):
+        """Barcha vidjetlarni default qiymatlarga qaytarish"""
+        self.name_input.clear()
+        self.spin_age.setValue(18)
+        self.dspin_gpa.setValue(3.0)
+        self.cb_python.setChecked(False)
+        self.cb_cpp.setChecked(False)
+        self.cb_js.setChecked(False)
+        self.cb_java.setChecked(False)
+        self.combo_city.setCurrentIndex(0)
+        self.list_courses.clearSelection()
+        self.slider_level.setValue(50)
+        self.dial_speed.setValue(5)
+        self.radio_male.setChecked(True)
+        self.date_birth.setDate(QDate.currentDate().addYears(-18))
+        self.comments.clear()
+
+        # Label'larni yangilash
+        self.slider_value_label.setText("📈 Daraja: 50")
+        self.dial_value_label.setText("⚡ Tezlik: 5")
+
+        reply = QMessageBox.question(
+            self,
+            "Reset",
+            "Barcha qiymatlarni tozalashni tasdiqlaysizmi?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            QMessageBox.information(self, "Reset", "✅ Barcha qiymatlar tozalandi!")
+            self.update_result()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+
+    # Font sozlamalari
+    font = QFont("Segoe UI", 10)
+    app.setFont(font)
+
+    w = WidgetsDemo()
+    w.show()
+    sys.exit(app.exec_())
