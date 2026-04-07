@@ -1,0 +1,164 @@
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QLabel, QLineEdit,
+    QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox,
+    QAction, QToolBar, QMessageBox
+)
+from PyQt5.QtCore import Qt
+
+
+class ToolbarCalculator(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Toolbar Kalkulyator")
+        self.setGeometry(300, 300, 500, 400)
+
+        # Markaziy widget
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout()
+        central_widget.setLayout(layout)
+
+        # Kalkulyator vidjetlari
+        self.num1_input = QLineEdit()
+        self.num1_input.setPlaceholderText("Birinchi son")
+        self.num1_input.setStyleSheet("padding: 10px; font-size: 14px;")
+
+        self.num2_input = QLineEdit()
+        self.num2_input.setPlaceholderText("Ikkinchi son")
+        self.num2_input.setStyleSheet("padding: 10px; font-size: 14px;")
+
+        self.result_label = QLabel("Natija: ")
+        self.result_label.setStyleSheet("""
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+        """)
+        self.result_label.setAlignment(Qt.AlignCenter)
+
+        # Layoutga qo'shish
+        layout.addWidget(QLabel("Kalkulyator"))
+        layout.addWidget(self.num1_input)
+        layout.addWidget(self.num2_input)
+        layout.addWidget(self.result_label)
+        layout.addStretch()
+
+        # Toolbar va menyu yaratish
+        self.create_toolbar()
+        self.create_menus()
+
+        # Status bar
+        self.statusBar().showMessage("Kalkulyator tayyor")
+
+    def create_toolbar(self):
+        toolbar = self.addToolBar("Kalkulyator")
+        toolbar.setMovable(False)
+        toolbar.setStyleSheet("""
+            QToolBar {
+                background-color: #34495e;
+                spacing: 5px;
+                padding: 5px;
+            }
+        """)
+
+        # Qo'shish action
+        add_action = QAction("➕ Qo'shish", self)
+        add_action.setToolTip("Sonlarni qo'shish")
+        add_action.triggered.connect(self.add_numbers)
+        toolbar.addAction(add_action)
+
+        # Ayirish action
+        subtract_action = QAction("➖ Ayirish", self)
+        subtract_action.setToolTip("Sonlarni ayirish")
+        subtract_action.triggered.connect(self.subtract_numbers)
+        toolbar.addAction(subtract_action)
+
+        toolbar.addSeparator()
+
+        # Tozalash action
+        clear_action = QAction("🗑️ Tozalash", self)
+        clear_action.setToolTip("Maydonlarni tozalash")
+        clear_action.triggered.connect(self.clear_all)
+        toolbar.addAction(clear_action)
+
+        # Chiqish action
+        exit_action = QAction("🚪 Chiqish", self)
+        exit_action.setToolTip("Dasturdan chiqish")
+        exit_action.triggered.connect(self.close_app)
+        toolbar.addAction(exit_action)
+
+    def create_menus(self):
+        # Menyu bar
+        menu_bar = self.menuBar()
+
+        # Amallar menyusi
+        operations_menu = menu_bar.addMenu("Amallar")
+
+        add_action = QAction("Qo'shish", self)
+        add_action.triggered.connect(self.add_numbers)
+        operations_menu.addAction(add_action)
+
+        subtract_action = QAction("Ayirish", self)
+        subtract_action.triggered.connect(self.subtract_numbers)
+        operations_menu.addAction(subtract_action)
+
+        operations_menu.addSeparator()
+
+        clear_action = QAction("Tozalash", self)
+        clear_action.triggered.connect(self.clear_all)
+        operations_menu.addAction(clear_action)
+
+        # Chiqish menyusi
+        exit_menu = menu_bar.addMenu("Dastur")
+        exit_action = QAction("Chiqish", self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close_app)
+        exit_menu.addAction(exit_action)
+
+    def get_numbers(self):
+        try:
+            num1 = float(self.num1_input.text())
+            num2 = float(self.num2_input.text())
+            return num1, num2
+        except ValueError:
+            QMessageBox.warning(self, "Xato", "Iltimos, to'g'ri son kiriting!")
+            return None, None
+
+    def add_numbers(self):
+        num1, num2 = self.get_numbers()
+        if num1 is not None:
+            result = num1 + num2
+            self.result_label.setText(f"Natija: {num1} + {num2} = {result}")
+            self.statusBar().showMessage(f"{num1} + {num2} = {result}", 3000)
+
+    def subtract_numbers(self):
+        num1, num2 = self.get_numbers()
+        if num1 is not None:
+            result = num1 - num2
+            self.result_label.setText(f"Natija: {num1} - {num2} = {result}")
+            self.statusBar().showMessage(f"{num1} - {num2} = {result}", 3000)
+
+    def clear_all(self):
+        self.num1_input.clear()
+        self.num2_input.clear()
+        self.result_label.setText("Natija: ")
+        self.statusBar().showMessage("Maydonlar tozalandi", 2000)
+
+    def close_app(self):
+        reply = QMessageBox.question(
+            self,
+            "Chiqish",
+            "Kalkulyatordan chiqishni xohlaysizmi?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        if reply == QMessageBox.Yes:
+            self.close()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = ToolbarCalculator()
+    window.show()
+    sys.exit(app.exec_())
