@@ -1,0 +1,124 @@
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QLabel, QAction, QMenuBar,
+    QStatusBar, QMessageBox, QVBoxLayout, QWidget
+)
+from PyQt5.QtCore import Qt
+
+
+class StudentPanel(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Talaba boshqaruv paneli")
+        self.setGeometry(200, 200, 600, 400)
+
+        # Markaziy widget va label
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+
+        layout = QVBoxLayout()
+        central_widget.setLayout(layout)
+
+        self.center_label = QLabel("Talaba boshqaruv paneliga xush kelibsiz!")
+        self.center_label.setAlignment(Qt.AlignCenter)
+        self.center_label.setStyleSheet("""
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+        """)
+        layout.addWidget(self.center_label)
+
+        # Menyu yaratish
+        self.create_menus()
+
+        # Status bar
+        self.statusBar().showMessage("Dastur tayyor | Talaba boshqaruv paneli")
+
+        # Styling
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #f5f5f5;
+            }
+            QMenuBar {
+                background-color: #34495e;
+                color: white;
+            }
+            QMenuBar::item {
+                padding: 5px 10px;
+            }
+            QMenuBar::item:selected {
+                background-color: #2c3e50;
+            }
+        """)
+
+    def create_menus(self):
+        # Fayl menyusi
+        file_menu = self.menuBar().addMenu("&Fayl")
+
+        # Yangi action (namuna uchun)
+        new_action = QAction("Yangi", self)
+        new_action.triggered.connect(self.new_file)
+        file_menu.addAction(new_action)
+
+        file_menu.addSeparator()
+
+        # Chiqish action
+        exit_action = QAction("Chiqish", self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close_app)
+        file_menu.addAction(exit_action)
+
+        # Yordam menyusi
+        help_menu = self.menuBar().addMenu("&Yordam")
+
+        about_action = QAction("Dastur haqida", self)
+        about_action.triggered.connect(self.show_about)
+        help_menu.addAction(about_action)
+
+        help_action = QAction("Yordam", self)
+        help_action.setShortcut("F1")
+        help_action.triggered.connect(self.show_help)
+        help_menu.addAction(help_action)
+
+    def new_file(self):
+        self.center_label.setText("Yangi fayl yaratildi")
+        self.statusBar().showMessage("Yangi fayl yaratildi", 2000)
+
+    def show_about(self):
+        QMessageBox.about(
+            self,
+            "Dastur haqida",
+            "Talaba boshqaruv paneli\n"
+            "Versiya: 1.0\n"
+            "PyQt5 da yaratilgan"
+        )
+
+    def show_help(self):
+        QMessageBox.information(
+            self,
+            "Yordam",
+            "Bu dastur talabalarni boshqarish uchun mo'ljallangan.\n\n"
+            "Fayl menyusi: Yangi fayl yaratish va chiqish\n"
+            "Yordam menyusi: Dastur haqida va yordam"
+        )
+
+    def close_app(self):
+        reply = QMessageBox.question(
+            self,
+            "Chiqish",
+            "Dasturdan chiqishni xohlaysizmi?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        if reply == QMessageBox.Yes:
+            self.close()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = StudentPanel()
+    window.show()
+    sys.exit(app.exec_())
