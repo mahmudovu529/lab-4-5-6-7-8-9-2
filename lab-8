@@ -1,0 +1,69 @@
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QPushButton, QVBoxLayout
+)
+
+# Barcha oldingi klasslar ishlashi uchun import qilamiz
+from PyQt5.QtWidgets import *
+
+# =====================
+# BARCHA OYNALARNI BOSHQARUVCHI MENU
+# =====================
+
+class MainMenu(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Super App Menu")
+        self.resize(300, 400)
+
+        layout = QVBoxLayout()
+
+        # Tugmalar
+        btn1 = QPushButton("1. Login Window")
+        btn2 = QPushButton("2. Calculator")
+        btn3 = QPushButton("3. Multi Page App")
+        btn4 = QPushButton("4. Student App")
+        btn5 = QPushButton("5. Mini Test")
+        btn6 = QPushButton("6. Familiya Dialog")
+        btn7 = QPushButton("7. Open Text")
+        btn8 = QPushButton("8. Save Text")
+        btn9 = QPushButton("9. Multi Button Dialog")
+        btn10 = QPushButton("10. Student Dialog")
+
+        # Bog‘lash
+        btn1.clicked.connect(lambda: self.open_window(LoginWindow()))
+        btn2.clicked.connect(lambda: self.open_window(Calculator()))
+        btn3.clicked.connect(lambda: self.open_window(MultiPageApp()))
+        btn4.clicked.connect(lambda: self.open_window(StudentApp()))
+        btn5.clicked.connect(lambda: self.open_window(TestApp()))
+        btn6.clicked.connect(lambda: self.open_dialog(SurnameDialog()))
+        btn7.clicked.connect(lambda: self.open_window(OpenTextApp()))
+        btn8.clicked.connect(lambda: self.open_window(SaveTextApp()))
+        btn9.clicked.connect(lambda: self.open_dialog(MultiButtonDialog()))
+        btn10.clicked.connect(lambda: self.open_dialog(StudentDialog()))
+
+        # Layoutga qo‘shish
+        for btn in [btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10]:
+            layout.addWidget(btn)
+
+        self.setLayout(layout)
+
+    def open_window(self, window):
+        self.w = window
+        self.w.show()
+
+    def open_dialog(self, dialog):
+        dialog.exec_()
+
+
+# =====================
+# MAIN
+# =====================
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+
+    menu = MainMenu()
+    menu.show()
+
+    sys.exit(app.exec_())
