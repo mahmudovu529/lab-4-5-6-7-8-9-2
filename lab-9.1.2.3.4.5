@@ -1,0 +1,659 @@
+import sys
+import json
+import os
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton,
+    QVBoxLayout, QHBoxLayout, QGroupBox, QMessageBox, QComboBox,
+    QSpinBox, QTextEdit, QTabWidget, QFileDialog
+)
+from PyQt5.QtCore import Qt
+
+
+# ==================== 1-vazifa: Foydalanuvchi ro'yxatdan o'tishi ====================
+class Task1_Registration(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("1-vazifa: Foydalanuvchi Ro'yxatdan O'tishi")
+        self.setFixedSize(450, 400)
+
+        # Maydonlar
+        self.firstname_input = QLineEdit()
+        self.firstname_input.setPlaceholderText("Ismingizni kiriting")
+
+        self.lastname_input = QLineEdit()
+        self.lastname_input.setPlaceholderText("Familiyangizni kiriting")
+
+        self.login_input = QLineEdit()
+        self.login_input.setPlaceholderText("Loginingizni kiriting")
+
+        self.password_input = QLineEdit()
+        self.password_input.setPlaceholderText("Parolingizni kiriting")
+        self.password_input.setEchoMode(QLineEdit.Password)
+
+        # Tugmalar
+        self.apply_btn = QPushButton("Apply")
+        self.reset_btn = QPushButton("Reset")
+        self.saveall_btn = QPushButton("SaveAll")
+        self.yes_btn = QPushButton("Yes")
+
+        # Layout
+        layout = QVBoxLayout()
+
+        form_group = QGroupBox("Ro'yxatdan o'tish formasi")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("Ism:"))
+        form_layout.addWidget(self.firstname_input)
+        form_layout.addWidget(QLabel("Familiya:"))
+        form_layout.addWidget(self.lastname_input)
+        form_layout.addWidget(QLabel("Login:"))
+        form_layout.addWidget(self.login_input)
+        form_layout.addWidget(QLabel("Parol:"))
+        form_layout.addWidget(self.password_input)
+        form_group.setLayout(form_layout)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.apply_btn)
+        btn_layout.addWidget(self.reset_btn)
+        btn_layout.addWidget(self.saveall_btn)
+        btn_layout.addWidget(self.yes_btn)
+
+        layout.addWidget(form_group)
+        layout.addLayout(btn_layout)
+        layout.addStretch()
+
+        self.setLayout(layout)
+
+        # Signal
+        self.apply_btn.clicked.connect(self.apply_data)
+        self.reset_btn.clicked.connect(self.reset_form)
+        self.saveall_btn.clicked.connect(self.save_all)
+        self.yes_btn.clicked.connect(self.confirm_registration)
+
+    def apply_data(self):
+        data = f"Ism: {self.firstname_input.text()}\nFamiliya: {self.lastname_input.text()}\nLogin: {self.login_input.text()}\nParol: {'*' * len(self.password_input.text())}"
+        QMessageBox.information(self, "Ma'lumotlar", data)
+
+    def reset_form(self):
+        self.firstname_input.clear()
+        self.lastname_input.clear()
+        self.login_input.clear()
+        self.password_input.clear()
+        QMessageBox.information(self, "Reset", "Forma tozalandi!")
+
+    def save_all(self):
+        data = {
+            'firstname': self.firstname_input.text(),
+            'lastname': self.lastname_input.text(),
+            'login': self.login_input.text(),
+            'password': self.password_input.text()
+        }
+        with open('users.json', 'a', encoding='utf-8') as f:
+            json.dump(data, f)
+            f.write('\n')
+        QMessageBox.information(self, "SaveAll", "Ma'lumotlar saqlandi!")
+
+    def confirm_registration(self):
+        if all([self.firstname_input.text(), self.lastname_input.text(),
+                self.login_input.text(), self.password_input.text()]):
+            QMessageBox.information(self, "Yes", "Ro'yxatdan o'tish tasdiqlandi!")
+        else:
+            QMessageBox.warning(self, "Xato", "Barcha maydonlarni to'ldiring!")
+
+
+# ==================== 2-vazifa: Kutubxona a'zosi ====================
+class Task2_LibraryMember(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("2-vazifa: Kutubxona a'zosi")
+        self.setFixedSize(500, 450)
+
+        self.fullname_input = QLineEdit()
+        self.fullname_input.setPlaceholderText("F.I.Sh")
+
+        self.course_input = QSpinBox()
+        self.course_input.setRange(1, 5)
+        self.course_input.setValue(1)
+
+        self.group_input = QLineEdit()
+        self.group_input.setPlaceholderText("Guruh raqami")
+
+        self.phone_input = QLineEdit()
+        self.phone_input.setPlaceholderText("+998 XX XXX-XX-XX")
+
+        self.saveall_btn = QPushButton("SaveAll")
+
+        layout = QVBoxLayout()
+        form_group = QGroupBox("Kutubxona a'zosi ma'lumotlari")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("F.I.Sh:"))
+        form_layout.addWidget(self.fullname_input)
+        form_layout.addWidget(QLabel("Kurs:"))
+        form_layout.addWidget(self.course_input)
+        form_layout.addWidget(QLabel("Guruh:"))
+        form_layout.addWidget(self.group_input)
+        form_layout.addWidget(QLabel("Telefon:"))
+        form_layout.addWidget(self.phone_input)
+        form_group.setLayout(form_layout)
+
+        layout.addWidget(form_group)
+        layout.addWidget(self.saveall_btn)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        self.saveall_btn.clicked.connect(self.save_to_file)
+
+    def save_to_file(self):
+        if not all([self.fullname_input.text(), self.group_input.text(), self.phone_input.text()]):
+            QMessageBox.warning(self, "Xato", "Barcha maydonlarni to'ldiring!")
+            return
+
+        data = f"F.I.Sh: {self.fullname_input.text()}\nKurs: {self.course_input.value()}\nGuruh: {self.group_input.text()}\nTelefon: {self.phone_input.text()}\n{'-' * 40}\n"
+        with open('library_members.txt', 'a', encoding='utf-8') as f:
+            f.write(data)
+        QMessageBox.information(self, "SaveAll", "Ma'lumotlar faylga saqlandi!")
+
+
+# ==================== 3-vazifa: Kompyuter sozlamalari ====================
+class Task3_ComputerSettings(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("3-vazifa: Kompyuter sozlamalari")
+        self.setFixedSize(500, 400)
+
+        self.computer_name = QLineEdit()
+        self.username = QLineEdit()
+        self.mode_combo = QComboBox()
+        self.mode_combo.addItems(["Standart", "O'yin", "Ofis", "Server"])
+
+        self.restore_btn = QPushButton("RestoreDefaults")
+
+        # Standart qiymatlar
+        self.default_computer = "PC-001"
+        self.default_user = "Admin"
+        self.default_mode = "Standart"
+
+        layout = QVBoxLayout()
+        form_group = QGroupBox("Kompyuter sozlamalari")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("Kompyuter nomi:"))
+        form_layout.addWidget(self.computer_name)
+        form_layout.addWidget(QLabel("Foydalanuvchi nomi:"))
+        form_layout.addWidget(self.username)
+        form_layout.addWidget(QLabel("Rejim:"))
+        form_layout.addWidget(self.mode_combo)
+        form_group.setLayout(form_layout)
+
+        layout.addWidget(form_group)
+        layout.addWidget(self.restore_btn)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        self.restore_btn.clicked.connect(self.restore_defaults)
+        self.set_defaults()
+
+    def set_defaults(self):
+        self.computer_name.setText(self.default_computer)
+        self.username.setText(self.default_user)
+        self.mode_combo.setCurrentText(self.default_mode)
+
+    def restore_defaults(self):
+        self.set_defaults()
+        QMessageBox.information(self, "RestoreDefaults", "Standart qiymatlar tiklandi!")
+
+
+# ==================== 4-vazifa: Parolni almashtirish ====================
+class Task4_ChangePassword(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("4-vazifa: Parolni almashtirish")
+        self.setFixedSize(450, 350)
+
+        self.old_password = QLineEdit()
+        self.old_password.setEchoMode(QLineEdit.Password)
+
+        self.new_password = QLineEdit()
+        self.new_password.setEchoMode(QLineEdit.Password)
+
+        self.confirm_password = QLineEdit()
+        self.confirm_password.setEchoMode(QLineEdit.Password)
+
+        self.yes_btn = QPushButton("Yes")
+
+        layout = QVBoxLayout()
+        form_group = QGroupBox("Parolni almashtirish")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("Eski parol:"))
+        form_layout.addWidget(self.old_password)
+        form_layout.addWidget(QLabel("Yangi parol:"))
+        form_layout.addWidget(self.new_password)
+        form_layout.addWidget(QLabel("Yangi parolni tasdiqlang:"))
+        form_layout.addWidget(self.confirm_password)
+        form_group.setLayout(form_layout)
+
+        layout.addWidget(form_group)
+        layout.addWidget(self.yes_btn)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        self.yes_btn.clicked.connect(self.change_password)
+
+    def change_password(self):
+        old = self.old_password.text()
+        new = self.new_password.text()
+        confirm = self.confirm_password.text()
+
+        if not old or not new or not confirm:
+            QMessageBox.warning(self, "Xato", "Barcha maydonlarni to'ldiring!")
+            return
+
+        if old == "1234":  # Simulyatsiya qilingan eski parol
+            if new == confirm:
+                if len(new) >= 4:
+                    QMessageBox.information(self, "Yes", "Parol muvaffaqiyatli o'zgartirildi!")
+                    self.clear_form()
+                else:
+                    QMessageBox.warning(self, "Xato", "Yangi parol kamida 4 belgidan iborat bo'lishi kerak!")
+            else:
+                QMessageBox.warning(self, "Xato", "Yangi parollar mos kelmadi!")
+        else:
+            QMessageBox.warning(self, "Xato", "Eski parol noto'g'ri!")
+
+    def clear_form(self):
+        self.old_password.clear()
+        self.new_password.clear()
+        self.confirm_password.clear()
+
+
+# ==================== 5-vazifa: Talaba anketasi ====================
+class Task5_StudentForm(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("5-vazifa: Talaba anketasi")
+        self.setFixedSize(500, 500)
+
+        self.name_input = QLineEdit()
+        self.group_input = QLineEdit()
+        self.faculty_combo = QComboBox()
+        self.faculty_combo.addItems(["Kompyuter injineringi", "Axborot tizimlari", "Iqtisodiyot", "Filologiya"])
+        self.address_input = QTextEdit()
+        self.address_input.setMaximumHeight(100)
+
+        self.help_btn = QPushButton("Help")
+
+        layout = QVBoxLayout()
+        form_group = QGroupBox("Talaba anketasi")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("Ism:"))
+        form_layout.addWidget(self.name_input)
+        form_layout.addWidget(QLabel("Guruh:"))
+        form_layout.addWidget(self.group_input)
+        form_layout.addWidget(QLabel("Fakultet:"))
+        form_layout.addWidget(self.faculty_combo)
+        form_layout.addWidget(QLabel("Manzil:"))
+        form_layout.addWidget(self.address_input)
+        form_group.setLayout(form_layout)
+
+        layout.addWidget(form_group)
+        layout.addWidget(self.help_btn)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        self.help_btn.clicked.connect(self.show_help)
+
+    def show_help(self):
+        QMessageBox.information(self, "Help",
+                                "📋 To'ldirish qoidalari:\n\n"
+                                "1. Ism: To'liq ismingizni kiriting (kamida 3 harf)\n"
+                                "2. Guruh: Guruh raqamingizni kiriting (masalan: 101)\n"
+                                "3. Fakultet: Ochiladigan ro'yxatdan tanlang\n"
+                                "4. Manzil: To'liq yashash manzilingizni kiriting\n\n"
+                                "Barcha maydonlarni to'ldirish majburiy!")
+
+
+# ==================== 6-vazifa: O'qituvchi ma'lumotlari ====================
+class Task6_TeacherInfo(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("6-vazifa: O'qituvchi ma'lumotlari")
+        self.setFixedSize(500, 450)
+
+        self.fullname_input = QLineEdit()
+        self.subject_input = QLineEdit()
+        self.experience_spin = QSpinBox()
+        self.experience_spin.setRange(0, 50)
+        self.phone_input = QLineEdit()
+
+        self.reset_btn = QPushButton("Reset")
+
+        layout = QVBoxLayout()
+        form_group = QGroupBox("O'qituvchi ma'lumotlari")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("F.I.Sh:"))
+        form_layout.addWidget(self.fullname_input)
+        form_layout.addWidget(QLabel("Fan nomi:"))
+        form_layout.addWidget(self.subject_input)
+        form_layout.addWidget(QLabel("Tajriba (yil):"))
+        form_layout.addWidget(self.experience_spin)
+        form_layout.addWidget(QLabel("Telefon raqam:"))
+        form_layout.addWidget(self.phone_input)
+        form_group.setLayout(form_layout)
+
+        layout.addWidget(form_group)
+        layout.addWidget(self.reset_btn)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        self.reset_btn.clicked.connect(self.reset_form)
+
+    def reset_form(self):
+        self.fullname_input.clear()
+        self.subject_input.clear()
+        self.experience_spin.setValue(0)
+        self.phone_input.clear()
+        QMessageBox.information(self, "Reset", "Barcha maydonlar tozalandi!")
+
+
+# ==================== 7-vazifa: Telefon buyurtma formasi ====================
+class Task7_PhoneOrder(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("7-vazifa: Telefon buyurtma formasi")
+        self.setFixedSize(500, 450)
+
+        self.model_combo = QComboBox()
+        self.model_combo.addItems(["iPhone 15", "Samsung S24", "Xiaomi 14", "Google Pixel 8"])
+
+        self.color_combo = QComboBox()
+        self.color_combo.addItems(["Qora", "Oq", "Ko'k", "Qizil", "Yashil"])
+
+        self.quantity_spin = QSpinBox()
+        self.quantity_spin.setRange(1, 10)
+        self.quantity_spin.setValue(1)
+
+        self.customer_name = QLineEdit()
+
+        self.apply_btn = QPushButton("Apply")
+
+        layout = QVBoxLayout()
+        form_group = QGroupBox("Telefon buyurtma formasi")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("Model:"))
+        form_layout.addWidget(self.model_combo)
+        form_layout.addWidget(QLabel("Rang:"))
+        form_layout.addWidget(self.color_combo)
+        form_layout.addWidget(QLabel("Soni:"))
+        form_layout.addWidget(self.quantity_spin)
+        form_layout.addWidget(QLabel("Xaridor ismi:"))
+        form_layout.addWidget(self.customer_name)
+        form_group.setLayout(form_layout)
+
+        layout.addWidget(form_group)
+        layout.addWidget(self.apply_btn)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        self.apply_btn.clicked.connect(self.show_order)
+
+    def show_order(self):
+        if not self.customer_name.text():
+            QMessageBox.warning(self, "Xato", "Xaridor ismini kiriting!")
+            return
+
+        order_info = (f"📱 BUYURTMA MA'LUMOTLARI\n\n"
+                      f"Xaridor: {self.customer_name.text()}\n"
+                      f"Model: {self.model_combo.currentText()}\n"
+                      f"Rang: {self.color_combo.currentText()}\n"
+                      f"Soni: {self.quantity_spin.value()}\n"
+                      f"Jami narx: ${self.quantity_spin.value() * 800}")
+
+        QMessageBox.information(self, "Apply", order_info)
+
+
+# ==================== 8-vazifa: Mehmonxona bron qilish ====================
+class Task8_HotelBooking(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("8-vazifa: Mehmonxona bron qilish")
+        self.setFixedSize(500, 450)
+
+        self.guest_name = QLineEdit()
+
+        self.room_combo = QComboBox()
+        self.room_combo.addItems(["Standart", "Lyuks", "Premium", "VIP"])
+
+        self.days_spin = QSpinBox()
+        self.days_spin.setRange(1, 30)
+        self.days_spin.setValue(1)
+
+        self.saveall_btn = QPushButton("SaveAll")
+
+        layout = QVBoxLayout()
+        form_group = QGroupBox("Mehmonxona bron qilish")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("Ism:"))
+        form_layout.addWidget(self.guest_name)
+        form_layout.addWidget(QLabel("Xona turi:"))
+        form_layout.addWidget(self.room_combo)
+        form_layout.addWidget(QLabel("Kunlar soni:"))
+        form_layout.addWidget(self.days_spin)
+        form_group.setLayout(form_layout)
+
+        layout.addWidget(form_group)
+        layout.addWidget(self.saveall_btn)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        self.saveall_btn.clicked.connect(self.save_booking)
+
+    def save_booking(self):
+        if not self.guest_name.text():
+            QMessageBox.warning(self, "Xato", "Ismni kiriting!")
+            return
+
+        data = (f"Ism: {self.guest_name.text()}\n"
+                f"Xona: {self.room_combo.currentText()}\n"
+                f"Kunlar: {self.days_spin.value()}\n"
+                f"Umumiy narx: ${self.days_spin.value() * 100}\n"
+                f"{'-' * 40}\n")
+
+        with open('hotel_bookings.txt', 'a', encoding='utf-8') as f:
+            f.write(data)
+
+        QMessageBox.information(self, "SaveAll", "Bron ma'lumotlari saqlandi!")
+
+
+# ==================== 9-vazifa: Fan tanlash oynasi ====================
+class Task9_CourseSelection(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("9-vazifa: Fan tanlash oynasi")
+        self.setFixedSize(500, 400)
+
+        self.student_name = QLineEdit()
+
+        self.course_combo = QComboBox()
+        self.course_combo.addItems([
+            "Dasturlash 2", "Ma'lumotlar tuzilmasi",
+            "Kompyuter tarmoqlari", "Sun'iy intellekt"
+        ])
+
+        self.semester_spin = QSpinBox()
+        self.semester_spin.setRange(1, 8)
+
+        self.restore_btn = QPushButton("RestoreDefaults")
+
+        # Standart qiymatlar
+        self.default_course = "Dasturlash 2"
+        self.default_semester = 1
+
+        layout = QVBoxLayout()
+        form_group = QGroupBox("Fan tanlash")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("Talaba ismi:"))
+        form_layout.addWidget(self.student_name)
+        form_layout.addWidget(QLabel("Fan nomi:"))
+        form_layout.addWidget(self.course_combo)
+        form_layout.addWidget(QLabel("Semestr:"))
+        form_layout.addWidget(self.semester_spin)
+        form_group.setLayout(form_layout)
+
+        layout.addWidget(form_group)
+        layout.addWidget(self.restore_btn)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        self.restore_btn.clicked.connect(self.restore_defaults)
+
+    def restore_defaults(self):
+        self.course_combo.setCurrentText(self.default_course)
+        self.semester_spin.setValue(self.default_semester)
+        QMessageBox.information(self, "RestoreDefaults", "Dastlabki fan tanlovi tiklandi!")
+
+
+# ==================== 10-vazifa: Admin sozlamalari ====================
+class Task10_AdminSettings(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("10-vazifa: Admin sozlamalari")
+        self.setFixedSize(550, 500)
+
+        self.admin_name = QLineEdit()
+
+        self.mode_combo = QComboBox()
+        self.mode_combo.addItems(["Standart", "Kengaytirilgan", "Xavfsiz"])
+
+        self.security_combo = QComboBox()
+        self.security_combo.addItems(["Yuqori", "O'rta", "Past"])
+
+        # Barcha tugmalar
+        self.apply_btn = QPushButton("Apply")
+        self.reset_btn = QPushButton("Reset")
+        self.restore_btn = QPushButton("RestoreDefaults")
+        self.help_btn = QPushButton("Help")
+        self.saveall_btn = QPushButton("SaveAll")
+        self.yes_btn = QPushButton("Yes")
+
+        # Standart qiymatlar
+        self.default_admin = "Administrator"
+        self.default_mode = "Standart"
+        self.default_security = "O'rta"
+
+        layout = QVBoxLayout()
+
+        form_group = QGroupBox("Admin sozlamalari")
+        form_layout = QVBoxLayout()
+        form_layout.addWidget(QLabel("Admin nomi:"))
+        form_layout.addWidget(self.admin_name)
+        form_layout.addWidget(QLabel("Tizim rejimi:"))
+        form_layout.addWidget(self.mode_combo)
+        form_layout.addWidget(QLabel("Xavfsizlik holati:"))
+        form_layout.addWidget(self.security_combo)
+        form_group.setLayout(form_layout)
+
+        # Tugmalar layouti
+        btn_layout1 = QHBoxLayout()
+        btn_layout1.addWidget(self.apply_btn)
+        btn_layout1.addWidget(self.reset_btn)
+        btn_layout1.addWidget(self.restore_btn)
+
+        btn_layout2 = QHBoxLayout()
+        btn_layout2.addWidget(self.help_btn)
+        btn_layout2.addWidget(self.saveall_btn)
+        btn_layout2.addWidget(self.yes_btn)
+
+        layout.addWidget(form_group)
+        layout.addLayout(btn_layout1)
+        layout.addLayout(btn_layout2)
+        layout.addStretch()
+
+        self.setLayout(layout)
+
+        # Signal
+        self.apply_btn.clicked.connect(self.apply_settings)
+        self.reset_btn.clicked.connect(self.reset_form)
+        self.restore_btn.clicked.connect(self.restore_defaults)
+        self.help_btn.clicked.connect(self.show_help)
+        self.saveall_btn.clicked.connect(self.save_settings)
+        self.yes_btn.clicked.connect(self.confirm_settings)
+
+        self.set_defaults()
+
+    def set_defaults(self):
+        self.admin_name.setText(self.default_admin)
+        self.mode_combo.setCurrentText(self.default_mode)
+        self.security_combo.setCurrentText(self.default_security)
+
+    def apply_settings(self):
+        info = (f"Admin: {self.admin_name.text()}\n"
+                f"Rejim: {self.mode_combo.currentText()}\n"
+                f"Xavfsizlik: {self.security_combo.currentText()}")
+        QMessageBox.information(self, "Apply", info)
+
+    def reset_form(self):
+        self.admin_name.clear()
+        self.mode_combo.setCurrentIndex(0)
+        self.security_combo.setCurrentIndex(1)
+        QMessageBox.information(self, "Reset", "Forma tozalandi!")
+
+    def restore_defaults(self):
+        self.set_defaults()
+        QMessageBox.information(self, "RestoreDefaults", "Standart qiymatlar tiklandi!")
+
+    def show_help(self):
+        QMessageBox.information(self, "Help",
+                                "Admin sozlamalari paneli:\n\n"
+                                "• Apply: Joriy sozlamalarni ko'rsatadi\n"
+                                "• Reset: Barcha maydonlarni tozalaydi\n"
+                                "• RestoreDefaults: Standart qiymatlarni tiklaydi\n"
+                                "• SaveAll: Sozlamalarni faylga saqlaydi\n"
+                                "• Yes: Sozlamalarni tasdiqlaydi")
+
+    def save_settings(self):
+        data = {
+            'admin_name': self.admin_name.text(),
+            'mode': self.mode_combo.currentText(),
+            'security': self.security_combo.currentText()
+        }
+        with open('admin_settings.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        QMessageBox.information(self, "SaveAll", "Sozlamalar saqlandi!")
+
+    def confirm_settings(self):
+        if self.admin_name.text():
+            QMessageBox.information(self, "Yes", "Sozlamalar tasdiqlandi!")
+        else:
+            QMessageBox.warning(self, "Xato", "Admin nomini kiriting!")
+
+
+# ==================== Asosiy oyna ====================
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("10 Vazifa - Barcha topshiriqlar")
+        self.setGeometry(100, 100, 900, 700)
+
+        # Tab widget
+        self.tabs = QTabWidget()
+        self.setCentralWidget(self.tabs)
+
+        # Barcha vazifalarni qo'shish
+        self.tabs.addTab(Task1_Registration(), "1️⃣ Ro'yxatdan o'tish")
+        self.tabs.addTab(Task2_LibraryMember(), "2️⃣ Kutubxona a'zosi")
+        self.tabs.addTab(Task3_ComputerSettings(), "3️⃣ Kompyuter sozlamalari")
+        self.tabs.addTab(Task4_ChangePassword(), "4️⃣ Parolni almashtirish")
+        self.tabs.addTab(Task5_StudentForm(), "5️⃣ Talaba anketasi")
+        self.tabs.addTab(Task6_TeacherInfo(), "6️⃣ O'qituvchi ma'lumotlari")
+        self.tabs.addTab(Task7_PhoneOrder(), "7️⃣ Telefon buyurtma")
+        self.tabs.addTab(Task8_HotelBooking(), "8️⃣ Mehmonxona bron")
+        self.tabs.addTab(Task9_CourseSelection(), "9️⃣ Fan tanlash")
+        self.tabs.addTab(Task10_AdminSettings(), "🔟 Admin sozlamalari")
+
+        # Status bar
+        self.statusBar().showMessage("10 ta vazifa muvaffaqiyatli yuklandi | Barcha tugmalar ishlaydi")
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())
