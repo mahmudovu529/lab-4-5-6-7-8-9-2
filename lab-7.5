@@ -1,0 +1,153 @@
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QTextEdit, QAction, QToolBar,
+    QStatusBar, QMessageBox, QFileDialog, QColorDialog, QFontDialog
+)
+from PyQt5.QtGui import QFont, QColor
+from PyQt5.QtCore import Qt
+
+
+class MultiSectionApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Ko'p bo'limli Dastur")
+        self.setGeometry(100, 100, 900, 700)
+
+        # Markazda QTextEdit
+        self.text_edit = QTextEdit()
+        self.text_edit.setFont(QFont("Arial", 12))
+        self.setCentralWidget(self.text_edit)
+
+        # Menyu, toolbar, status bar yaratish
+        self.create_menus()
+        self.create_toolbar()
+
+        # Status bar
+        self.statusBar = QStatusBar()
+        self.setStatusBar(self.statusBar)
+        self.statusBar.showMessage("Dastur tayyor | Matn muharriri tayyor")
+
+        # Joriy fayl nomi
+        self.current_file = None
+
+    def create_menus(self):
+        menubar = self.menuBar()
+
+        # 1. Fayl menyusi
+        file_menu = menubar.addMenu("📁 Fayl")
+
+        new_action = QAction("Yangi", self)
+        new_action.setShortcut("Ctrl+N")
+        new_action.triggered.connect(self.new_file)
+        file_menu.addAction(new_action)
+
+        open_action = QAction("Ochish", self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.triggered.connect(self.open_file)
+        file_menu.addAction(open_action)
+
+        save_action = QAction("Saqlash", self)
+        save_action.setShortcut("Ctrl+S")
+        save_action.triggered.connect(self.save_file)
+        file_menu.addAction(save_action)
+
+        save_as_action = QAction("Boshqacha saqlash", self)
+        save_as_action.setShortcut("Ctrl+Shift+S")
+        save_as_action.triggered.connect(self.save_as_file)
+        file_menu.addAction(save_as_action)
+
+        file_menu.addSeparator()
+
+        exit_action = QAction("Chiqish", self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close_app)
+        file_menu.addAction(exit_action)
+
+        # 2. Tahrirlash menyusi
+        edit_menu = menubar.addMenu("✏️ Tahrirlash")
+
+        undo_action = QAction("Bekor qilish", self)
+        undo_action.setShortcut("Ctrl+Z")
+        undo_action.triggered.connect(self.text_edit.undo)
+        edit_menu.addAction(undo_action)
+
+        redo_action = QAction("Qaytarish", self)
+        redo_action.setShortcut("Ctrl+Y")
+        redo_action.triggered.connect(self.text_edit.redo)
+        edit_menu.addAction(redo_action)
+
+        edit_menu.addSeparator()
+
+        cut_action = QAction("Kesish", self)
+        cut_action.setShortcut("Ctrl+X")
+        cut_action.triggered.connect(self.text_edit.cut)
+        edit_menu.addAction(cut_action)
+
+        copy_action = QAction("Nusxalash", self)
+        copy_action.setShortcut("Ctrl+C")
+        copy_action.triggered.connect(self.text_edit.copy)
+        edit_menu.addAction(copy_action)
+
+        paste_action = QAction("Qo'yish", self)
+        paste_action.setShortcut("Ctrl+V")
+        paste_action.triggered.connect(self.text_edit.paste)
+        edit_menu.addAction(paste_action)
+
+        edit_menu.addSeparator()
+
+        select_all_action = QAction("Hammasini tanlash", self)
+        select_all_action.setShortcut("Ctrl+A")
+        select_all_action.triggered.connect(self.text_edit.selectAll)
+        edit_menu.addAction(select_all_action)
+
+        clear_action = QAction("Tozalash", self)
+        clear_action.triggered.connect(self.clear_text)
+        edit_menu.addAction(clear_action)
+
+        # 3. Format menyusi
+        format_menu = menubar.addMenu("🎨 Format")
+
+        font_action = QAction("Shrift", self)
+        font_action.triggered.connect(self.change_font)
+        format_menu.addAction(font_action)
+
+        color_action = QAction("Matn rangi", self)
+        color_action.triggered.connect(self.change_color)
+        format_menu.addAction(color_action)
+
+        format_menu.addSeparator()
+
+        bg_color_action = QAction("Fon rangi", self)
+        bg_color_action.triggered.connect(self.change_background)
+        format_menu.addAction(bg_color_action)
+
+    def create_toolbar(self):
+        toolbar = self.addToolBar("Asosiy")
+        toolbar.setMovable(False)
+        toolbar.setStyleSheet("""
+            QToolBar {
+                background-color: #34495e;
+                spacing: 5px;
+                padding: 5px;
+            }
+            QToolButton {
+                color: white;
+            }
+        """)
+
+        # Fayl amallari
+        new_action = QAction("📄 Yangi", self)
+        new_action.triggered.connect(self.new_file)
+        toolbar.addAction(new_action)
+
+        open_action = QAction("📂 Ochish", self)
+        open_action.triggered.connect(self.open_file)
+        toolbar.addAction(open_action)
+
+        save_action = QAction("💾 Saqlash", self)
+        save_action.triggered.connect(self.save_file)
+        toolbar.addAction(save_action)
+
+        toolbar.addSeparator()
+
+        # Tahrirlash
