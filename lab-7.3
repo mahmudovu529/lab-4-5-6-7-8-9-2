@@ -1,0 +1,208 @@
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QTextEdit, QAction, QToolBar,
+    QMessageBox, QFileDialog
+)
+from PyQt5.QtGui import QFont
+
+
+class NotesApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Eslatmalar Dasturi")
+        self.setGeometry(100, 100, 800, 600)
+
+        # Markaziy QTextEdit
+        self.text_edit = QTextEdit()
+        self.text_edit.setFont(QFont("Arial", 12))
+        self.setCentralWidget(self.text_edit)
+
+        # Menyu va toolbar yaratish
+        self.create_menus()
+        self.create_toolbar()
+
+        # Status bar
+        self.statusBar().showMessage("Eslatmalar dasturi tayyor | Yangi eslatma yozishingiz mumkin")
+
+        # Joriy fayl nomi
+        self.current_file = None
+
+    def create_menus(self):
+        menubar = self.menuBar()
+
+        # Fayl menyusi
+        file_menu = menubar.addMenu("Fayl")
+
+        new_action = QAction("Yangi", self)
+        new_action.setShortcut("Ctrl+N")
+        new_action.triggered.connect(self.new_note)
+        file_menu.addAction(new_action)
+
+        open_action = QAction("Ochish", self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.triggered.connect(self.open_note)
+        file_menu.addAction(open_action)
+
+        save_action = QAction("Saqlash", self)
+        save_action.setShortcut("Ctrl+S")
+        save_action.triggered.connect(self.save_note)
+        file_menu.addAction(save_action)
+
+        file_menu.addSeparator()
+
+        clear_action = QAction("Tozalash", self)
+        clear_action.triggered.connect(self.clear_note)
+        file_menu.addAction(clear_action)
+
+        file_menu.addSeparator()
+
+        exit_action = QAction("Chiqish", self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close_app)
+        file_menu.addAction(exit_action)
+
+        # Yordam menyusi
+        help_menu = menubar.addMenu("Yordam")
+
+        about_action = QAction("Dastur haqida", self)
+        about_action.triggered.connect(self.show_about)
+        help_menu.addAction(about_action)
+
+    def create_toolbar(self):
+        toolbar = self.addToolBar("Eslatmalar")
+        toolbar.setMovable(False)
+
+        # Yangi
+        new_action = QAction("📄 Yangi", self)
+        new_action.triggered.connect(self.new_note)
+        toolbar.addAction(new_action)
+
+        # Ochish
+        open_action = QAction("📂 Ochish", self)
+        open_action.triggered.connect(self.open_note)
+        toolbar.addAction(open_action)
+
+        # Saqlash
+        save_action = QAction("💾 Saqlash", self)
+        save_action.triggered.connect(self.save_note)
+        toolbar.addAction(save_action)
+
+        toolbar.addSeparator()
+
+        # Tozalash
+        clear_action = QAction("🗑️ Tozalash", self)
+        clear_action.triggered.connect(self.clear_note)
+        toolbar.addAction(clear_action)
+
+        # Chiqish
+        exit_action = QAction("🚪 Chiqish", self)
+        exit_action.triggered.connect(self.close_app)
+        toolbar.addAction(exit_action)
+
+    def new_note(self):
+        if self.text_edit.document().isModified():
+            reply = QMessageBox.question(
+                self,
+                "Saqlash",
+                "Joriy eslatmani saqlashni xohlaysizmi?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Yes:
+                self.save_note()
+            elif reply == QMessageBox.Cancel:
+                return
+
+        self.text_edit.clear()
+        self.current_file = None
+        self.statusBar().showMessage("Yangi eslatma yaratildi", 2000)
+
+    def open_note(self):
+        file_name, _ = QFileDialog.getOpenFileName(
+            self,
+            "Eslatma ochish",
+            "",
+            "Matn fayllari (*.txt);;Barcha fayllar (*.*)"
+        )
+
+        if file_name:
+            try:
+                with open(file_name, 'r', encoding='utf-8') as file:
+                    content = file.read()
+                    self.text_edit.setText(content)
+                    self.current_file = file_name
+                    self.statusBar().showMessage(f"Fayl ochildi: {file_name}", 3000)
+            except Exception as e:
+                QMessageBox.warning(self, "Xato", f"Faylni ochib bo'lmadi: {str(e)}")
+
+    def save_note(self):
+        if self.current_file:
+            try:
+                with open(self.current_file, 'w', encoding='utf-8') as file:
+                    file.write(self.text_edit.toPlainText())
+                    self.text_edit.document().setModified(False)
+                    QMessageBox.information(self, "Saqlash", "Eslatma muvaffaqiyatli saqlandi!")
+                    self.statusBar().showMessage(f"Saqlangan: {self.current_file}", 3000)
+            except Exception as e:
+                QMessageBox.warning(self, "Xato", f"Saqlab bo'lmadi: {str(e)}")
+        else:
+            file_name, _ = QFileDialog.getSaveFileName(
+                self,
+                "Eslatmani saqlash",
+                "eslatma.txt",
+                "Matn fayllari (*.txt);;Barcha fayllar (*.*)"
+            )
+            if file_name:
+                try:
+                    with open(file_name, 'w', encoding='utf-8') as file:
+                        file.write(self.text_edit.toPlainText())
+                        self.current_file = file_name
+                        self.text_edit.document().setModified(False)
+                        QMessageBox.information(self, "Saqlash", "Eslatma muvaffaqiyatli saqlandi!")
+                        self.statusBar().showMessage(f"Saqlangan: {file_name}", 3000)
+                except Exception as e:
+                    QMessageBox.warning(self, "Xato", f"Saqlab bo'lmadi: {str(e)}")
+
+    def clear_note(self):
+        reply = QMessageBox.question(
+            self,
+            "Tozalash",
+            "Barcha matnni tozalamoqchimisiz?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        if reply == QMessageBox.Yes:
+            self.text_edit.clear()
+            self.statusBar().showMessage("Eslatma tozalandi", 2000)
+
+    def show_about(self):
+        QMessageBox.about(
+            self,
+            "Eslatmalar Dasturi",
+            "Oddiy eslatmalar dasturi\n"
+            "Versiya: 1.0\n\n"
+            "Xususiyatlar:\n"
+            "• Yangi eslatma yaratish\n"
+            "• Fayldan eslatma ochish\n"
+            "• Eslatmani saqlash\n"
+            "• Matnni tozalash"
+        )
+
+    def close_app(self):
+        if self.text_edit.document().isModified():
+            reply = QMessageBox.question(
+                self,
+                "Chiqish",
+                "O'zgarishlarni saqlashni xohlaysizmi?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Yes:
+                self.save_note()
+            elif reply == QMessageBox.Cancel:
+                return
+        self.close()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = NotesApp()
+    window.show()
+    sys.exit(app.exec_())
