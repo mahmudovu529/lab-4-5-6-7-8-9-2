@@ -1,0 +1,137 @@
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QLabel, QPushButton, QVBoxLayout,
+    QHBoxLayout, QGroupBox, QMessageBox, QDoubleSpinBox
+)
+from PyQt5.QtCore import Qt
+
+
+class CalculatorWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("2-topshiriq: Kalkulyator")
+        self.setFixedSize(450, 450)
+
+        # Vidjetlar
+        self.num1_input = QDoubleSpinBox()
+        self.num1_input.setRange(-999999, 999999)
+        self.num1_input.setValue(0)
+        self.num1_input.setPrefix("1-son: ")
+        self.num1_input.setStyleSheet("padding: 5px; font-size: 14px;")
+
+        self.num2_input = QDoubleSpinBox()
+        self.num2_input.setRange(-999999, 999999)
+        self.num2_input.setValue(0)
+        self.num2_input.setPrefix("2-son: ")
+        self.num2_input.setStyleSheet("padding: 5px; font-size: 14px;")
+
+        self.add_btn = QPushButton("➕ Qo'shish (+)")
+        self.subtract_btn = QPushButton("➖ Ayirish (-)")
+        self.multiply_btn = QPushButton("✖️ Ko'paytirish (×)")
+        self.divide_btn = QPushButton("➗ Bo'lish (÷)")
+        self.clear_btn = QPushButton("🗑️ Tozalash")
+
+        self.result_label = QLabel("Natija: 0")
+        self.result_label.setStyleSheet("""
+            font-size: 20px; 
+            font-weight: bold; 
+            background-color: #f0f0f0; 
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+        """)
+        self.result_label.setAlignment(Qt.AlignCenter)
+
+        # Tugmalar stillari
+        button_style = """
+            QPushButton {
+                padding: 12px;
+                font-size: 14px;
+                font-weight: bold;
+                border-radius: 5px;
+                margin: 3px;
+            }
+            QPushButton:hover {
+                opacity: 0.8;
+            }
+        """
+
+        self.add_btn.setStyleSheet(button_style + "background-color: #4CAF50; color: white;")
+        self.subtract_btn.setStyleSheet(button_style + "background-color: #FF9800; color: white;")
+        self.multiply_btn.setStyleSheet(button_style + "background-color: #9C27B0; color: white;")
+        self.divide_btn.setStyleSheet(button_style + "background-color: #f44336; color: white;")
+        self.clear_btn.setStyleSheet(button_style + "background-color: #607D8B; color: white;")
+
+        # Layout
+        layout = QVBoxLayout()
+
+        # Inputlar
+        input_group = QGroupBox("📝 Sonlarni kiriting")
+        input_layout = QVBoxLayout()
+        input_layout.addWidget(self.num1_input)
+        input_layout.addWidget(self.num2_input)
+        input_group.setLayout(input_layout)
+
+        # Tugmalar (2 qator)
+        button_layout1 = QHBoxLayout()
+        button_layout1.addWidget(self.add_btn)
+        button_layout1.addWidget(self.subtract_btn)
+
+        button_layout2 = QHBoxLayout()
+        button_layout2.addWidget(self.multiply_btn)
+        button_layout2.addWidget(self.divide_btn)
+
+        button_layout3 = QHBoxLayout()
+        button_layout3.addWidget(self.clear_btn)
+
+        layout.addWidget(input_group)
+        layout.addLayout(button_layout1)
+        layout.addLayout(button_layout2)
+        layout.addLayout(button_layout3)
+        layout.addWidget(self.result_label)
+        layout.addStretch()
+
+        self.setLayout(layout)
+
+        # Signal
+        self.add_btn.clicked.connect(self.add_numbers)
+        self.subtract_btn.clicked.connect(self.subtract_numbers)
+        self.multiply_btn.clicked.connect(self.multiply_numbers)
+        self.divide_btn.clicked.connect(self.divide_numbers)
+        self.clear_btn.clicked.connect(self.clear_all)
+
+    def add_numbers(self):
+        result = self.num1_input.value() + self.num2_input.value()
+        self.result_label.setText(
+            f"📊 Natija: {self.num1_input.value():.2f} + {self.num2_input.value():.2f} = {result:.2f}")
+
+    def subtract_numbers(self):
+        result = self.num1_input.value() - self.num2_input.value()
+        self.result_label.setText(
+            f"📊 Natija: {self.num1_input.value():.2f} - {self.num2_input.value():.2f} = {result:.2f}")
+
+    def multiply_numbers(self):
+        result = self.num1_input.value() * self.num2_input.value()
+        self.result_label.setText(
+            f"📊 Natija: {self.num1_input.value():.2f} × {self.num2_input.value():.2f} = {result:.2f}")
+
+    def divide_numbers(self):
+        if self.num2_input.value() == 0:
+            QMessageBox.warning(self, "Xato", "❌ 0 ga bo'lish mumkin emas!")
+            self.result_label.setText("📊 Natija: Xato (0 ga bo'lish)")
+        else:
+            result = self.num1_input.value() / self.num2_input.value()
+            self.result_label.setText(
+                f"📊 Natija: {self.num1_input.value():.2f} ÷ {self.num2_input.value():.2f} = {result:.2f}")
+
+    def clear_all(self):
+        self.num1_input.setValue(0)
+        self.num2_input.setValue(0)
+        self.result_label.setText("📊 Natija: 0")
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = CalculatorWindow()
+    window.show()
+    sys.exit(app.exec_())
